@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="he">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>World Builder</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* Animated resource preview */
+    .resource {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-direction: row-reverse;
+    }
+
+    .resource .resource-canvas {
+      width: 80px;
+      height: 48px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 -2px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .resource span {
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <aside id="palette">
+      <h3>חפצים</h3>
+      <div class="resource" data-type="grass">
+        <canvas class="resource-canvas" width="80" height="48" aria-label="grass preview"></canvas>
+        <span>דשא</span>
+      </div>
+      <div class="resource" data-type="rock">
+        <canvas class="resource-canvas" width="80" height="48" aria-label="rock preview"></canvas>
+        <span>אבן</span>
+      </div>
+      <div class="resource" data-type="powerbox">
+        <canvas id="powerboxPreviewCanvas" class="resource-canvas" width="80" height="48" aria-label="power box preview"></canvas>
+        <span>תיבת כוח</span>
+      </div>
+      <div class="resource" data-type="spawn">
+        <canvas id="spawnPreviewCanvas" class="resource-canvas" width="80" height="48" aria-label="spawn preview"></canvas>
+        <span>הולדה</span>
+      </div>
+      <hr>
+      <label><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
+      <div style="margin-top:12px;">
+        <label style="display:block; margin-bottom:4px;">צבע רקע:</label>
+        <input type="color" id="bgColorPicker" value="#eaf2d7" style="width:100%; height:36px; cursor:pointer;">
+        <div id="colorDisplay" style="margin-top:6px; font-size:13px; color:#000000;"> #eaf2d7</div>
+      </div>
+      <div class="controls">
+        <button id="undoBtn">חזור</button>
+        <button id="redoBtn">הבא</button>
+        <button id="clearAllBtn">מחק הכל</button>
+        <button id="exportBtn">יצא JSON</button>
+        <input id="importFile" type="file" accept="application/json" />
+      </div>
+    </aside>
+
+    <main id="stageWrap">
+      <button id="settingsBtn" type="button" aria-label="הגדרות">⚙ הגדרות</button>
+      <button id="worldSelectBtn" type="button" aria-label="בחירת עולם">בחירת עולם</button>
+      <div id="stageControls" aria-label="camera controls">
+        <button id="scrollLeftBtn" type="button" aria-label="גלול שמאלה">◀</button>
+        <div id="cameraHud">X: 0&nbsp;&nbsp;Y: 0</div>
+        <button id="fullscreenBtn" type="button" aria-label="פתח במסך מלא">מסך מלא</button>
+        <button id="scrollRightBtn" type="button" aria-label="גלול ימינה">▶</button>
+      </div>
+      <canvas id="stage" width="1200" height="800"></canvas>
+
+      <div id="worldSelectModal" class="settings-modal" hidden>
+        <div class="settings-card world-select-card" role="dialog" aria-modal="true" aria-labelledby="worldSelectTitle">
+          <h3 id="worldSelectTitle">בחירת עולם</h3>
+          <div class="world-select-grid">
+            <button type="button" class="world-option" data-world-slot="1" data-world-name="סולו / זוג / שלישיה">1. סולו / זוג / שלישיה</button>
+            <button type="button" class="world-option locked-now" data-world-slot="2" data-world-name="שוד">2. שוד</button>
+            <button type="button" class="world-option locked-now" data-world-slot="3" data-world-name="כדורגל">3. כדורגל</button>
+            <button type="button" class="world-option locked-now" data-world-slot="4" data-world-name="כדורסל">4. כדורסל</button>
+            <button type="button" class="world-option locked-now" data-world-slot="5" data-world-name="כדור עף">5. כדור עף</button>
+            <button type="button" class="world-option empty-slot" data-world-slot="6" disabled>6.</button>
+            <button type="button" class="world-option empty-slot" data-world-slot="7" disabled>7.</button>
+            <button type="button" class="world-option empty-slot" data-world-slot="8" disabled>8.</button>
+            <button type="button" class="world-option empty-slot" data-world-slot="9" disabled>9.</button>
+            <button type="button" class="world-option empty-slot" data-world-slot="10" disabled>10.</button>
+          </div>
+          <div id="worldSelectNotice" class="world-select-notice" aria-live="polite"></div>
+          <div class="settings-actions">
+            <button id="worldSelectCloseBtn" type="button">סגור</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="settingsModal" class="settings-modal" hidden>
+        <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+          <h3 id="settingsTitle">הגדרות</h3>
+          <label for="powerboxHpInput">חיים של תיבת כוח:</label>
+          <input id="powerboxHpInput" type="number" min="1" max="999999" step="1" value="1000" />
+
+          <h4>מה אפשר לעשות</h4>
+          <ul>
+            <li>לגרור משאבים מהפלטה למסך הירוק.</li>
+            <li>להזיז משאב קיים על ידי גרירה.</li>
+            <li>לבטל/להחזיר פעולות עם חזור/הבא.</li>
+            <li>לגלול בעולם: גלגלת עכבר, או לחיצה ימנית וגרירה, או לחיצה שמאלית וגרירה על שטח ריק.</li>
+          </ul>
+
+          <h4>איך מוחקים</h4>
+          <p>לחיצה ימנית על המשאב תמחק אותו.</p>
+
+          <div class="settings-actions">
+            <button id="settingsSaveBtn" type="button">שמור</button>
+            <button id="settingsCloseBtn" type="button">סגור</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="gae.js"></script>
+  <script>
+    // ציור דשא בפלטה - בלוק תלת ממדי קטן
+    (function () {
+      const c = document.querySelector('.resource[data-type="grass"] .resource-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+
+      const sky = ctx.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0, '#c9ecff');
+      sky.addColorStop(1, '#f2fbff');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, W, H);
+
+      const top = [
+        { x: 20, y: 12 },
+        { x: 50, y: 12 },
+        { x: 62, y: 20 },
+        { x: 32, y: 20 }
+      ];
+      const front = [
+        { x: 32, y: 20 },
+        { x: 62, y: 20 },
+        { x: 62, y: 36 },
+        { x: 32, y: 36 }
+      ];
+      const side = [
+        { x: 20, y: 12 },
+        { x: 32, y: 20 },
+        { x: 32, y: 36 },
+        { x: 20, y: 28 }
+      ];
+
+      function poly(points, fill) {
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+
+      poly(front, '#2f8f3a');
+      poly(side, '#1f6f2b');
+      poly(top, '#53c65f');
+
+      // טקסטורת עשב עדינה על החלק העליון.
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(top[0].x, top[0].y);
+      for (let i = 1; i < top.length; i++) ctx.lineTo(top[i].x, top[i].y);
+      ctx.closePath();
+      ctx.clip();
+      for (let i = 0; i < 80; i++) {
+        const x = 20 + Math.random() * 42;
+        const y = 10 + Math.random() * 12;
+        ctx.fillStyle = `rgba(${40 + Math.random() * 30}, ${150 + Math.random() * 80}, ${35 + Math.random() * 25}, 0.48)`;
+        ctx.fillRect(x, y, 2, 2);
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = 'rgba(32, 48, 24, 0.55)';
+      ctx.lineWidth = 1;
+      poly(front, 'rgba(0,0,0,0)');
+      poly(side, 'rgba(0,0,0,0)');
+      poly(top, 'rgba(0,0,0,0)');
+    })();
+
+    // ציור אבן בפלטה - בלוק אבן תלת ממדי כמו בגרירה
+    (function () {
+      const c = document.querySelector('.resource[data-type="rock"] .resource-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#f8f8f8');
+      bg.addColorStop(1, '#ececec');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const x = 18;
+      const y = 13;
+      const width = 36;
+      const height = 24;
+      const depth = 9;
+      const radius = 4;
+
+      function roundedRectPath(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(x + width / 2 + depth / 2, y + height + 4, width / 1.6, depth / 2.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#4b5563';
+      ctx.beginPath();
+      ctx.moveTo(x + width - radius, y);
+      ctx.lineTo(x + width + depth - radius, y - depth);
+      ctx.arcTo(x + width + depth, y - depth, x + width + depth, y - depth + radius, radius);
+      ctx.lineTo(x + width + depth, y + height - depth - radius);
+      ctx.arcTo(x + width + depth, y + height - depth, x + width + depth - radius, y + height - depth, radius);
+      ctx.lineTo(x + width - radius, y + height);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#e5e7eb';
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + radius + depth, y - depth);
+      ctx.lineTo(x + width + depth - radius, y - depth);
+      ctx.lineTo(x + width - radius, y);
+      ctx.closePath();
+      ctx.fill();
+
+      const frontGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+      frontGrad.addColorStop(0, '#9ca3af');
+      frontGrad.addColorStop(1, '#6b7280');
+      roundedRectPath(x, y, width, height, radius);
+      ctx.fillStyle = frontGrad;
+      ctx.fill();
+
+      ctx.strokeStyle = '#1f2937';
+      ctx.lineWidth = 1.4;
+      roundedRectPath(x, y, width, height, radius);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y + 3);
+      ctx.lineTo(x + width - radius, y + 3);
+      ctx.stroke();
+    })();
+
+    // ציור תיבת כוח בפלטה - כספת צהובה אפורה עם חיים
+    (function () {
+      const c = document.querySelector('.resource[data-type="powerbox"] .resource-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#fff9de');
+      bg.addColorStop(1, '#f3f4f6');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const x = 20;
+      const y = 14;
+      const width = 30;
+      const height = 20;
+      const depth = 7;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(x + width / 2 + depth / 2, y + height + 4, width / 1.6, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#6b7280';
+      ctx.beginPath();
+      ctx.moveTo(x + width, y);
+      ctx.lineTo(x + width + depth, y - depth);
+      ctx.lineTo(x + width + depth, y + height - depth);
+      ctx.lineTo(x + width, y + height);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + width, y);
+      ctx.lineTo(x + width + depth, y - depth);
+      ctx.lineTo(x + depth, y - depth);
+      ctx.closePath();
+      ctx.fill();
+
+      const front = ctx.createLinearGradient(x, y, x + width, y + height);
+      front.addColorStop(0, '#f59e0b');
+      front.addColorStop(1, '#9ca3af');
+      ctx.fillStyle = front;
+      ctx.fillRect(x, y, width, height);
+
+      ctx.strokeStyle = '#374151';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(x, y, width, height);
+
+      ctx.fillStyle = '#d1d5db';
+      ctx.fillRect(x + 7, y + 4, width - 14, height - 8);
+      ctx.strokeStyle = '#4b5563';
+      ctx.strokeRect(x + 7, y + 4, width - 14, height - 8);
+
+      ctx.strokeStyle = '#374151';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(x + width / 2, y + height / 2, 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + width / 2 - 3, y + height / 2);
+      ctx.lineTo(x + width / 2 + 3, y + height / 2);
+      ctx.moveTo(x + width / 2, y + height / 2 - 3);
+      ctx.lineTo(x + width / 2, y + height / 2 + 3);
+      ctx.stroke();
+
+      const hp = Number(window.__builderPowerboxHp || 1000);
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(hp), x + width / 2 + 3, y - 4);
+    })();
+
+    // ציור הולדה בפלטה - עיגול אפור
+    (function () {
+      const c = document.querySelector('.resource[data-type="spawn"] .resource-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#f8fafc');
+      bg.addColorStop(1, '#e2e8f0');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const cx = W / 2;
+      const cy = H / 2;
+      const r = Math.min(W, H) * 0.3;
+
+      const g = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.35, r * 0.25, cx, cy, r);
+      g.addColorStop(0, '#f1f5f9');
+      g.addColorStop(0.65, '#94a3b8');
+      g.addColorStop(1, '#64748b');
+      ctx.fillStyle = g;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.7)';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    })();
+  </script>
+</body>
+</html>
