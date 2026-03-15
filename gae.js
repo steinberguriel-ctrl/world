@@ -4,8 +4,6 @@
   // CONFIG
   const ASSETS = {
     grass: 'grass.png',
-    rock: 'rock.png',
-    powerbox: 'powerbox.png',
   };
   const PLAY_LOGICAL_WIDTH = 1920;
   const PLAY_LOGICAL_HEIGHT = 1080;
@@ -276,67 +274,100 @@
     ctx2.fillStyle = bg;
     ctx2.fillRect(0, 0, W, H);
 
-    const x = 20;
-    const y = 14;
-    const width = 30;
-    const height = 20;
-    const depth = 7;
+    const size = 28;
+    const x = Math.round((W - size) / 2);
+    const y = Math.round((H - size) / 2);
+    const r = 5;
 
-    ctx2.fillStyle = 'rgba(0,0,0,0.18)';
-    ctx2.beginPath();
-    ctx2.ellipse(x + width / 2 + depth / 2, y + height + 4, width / 1.6, 4, 0, 0, Math.PI * 2);
-    ctx2.fill();
+    function roundRectPath(ctxRef, px, py, pw, ph, pr) {
+      ctxRef.beginPath();
+      ctxRef.moveTo(px + pr, py);
+      ctxRef.lineTo(px + pw - pr, py);
+      ctxRef.arcTo(px + pw, py, px + pw, py + pr, pr);
+      ctxRef.lineTo(px + pw, py + ph - pr);
+      ctxRef.arcTo(px + pw, py + ph, px + pw - pr, py + ph, pr);
+      ctxRef.lineTo(px + pr, py + ph);
+      ctxRef.arcTo(px, py + ph, px, py + ph - pr, pr);
+      ctxRef.lineTo(px, py + pr);
+      ctxRef.arcTo(px, py, px + pr, py, pr);
+      ctxRef.closePath();
+    }
 
-    ctx2.fillStyle = '#6b7280';
-    ctx2.beginPath();
-    ctx2.moveTo(x + width, y);
-    ctx2.lineTo(x + width + depth, y - depth);
-    ctx2.lineTo(x + width + depth, y + height - depth);
-    ctx2.lineTo(x + width, y + height);
-    ctx2.closePath();
-    ctx2.fill();
+    const previewDepth = 6;
+    drawTopDownDepth(ctx2, x, y, size, size, previewDepth, '#06b6d4', '#f97316');
 
-    ctx2.fillStyle = '#facc15';
-    ctx2.beginPath();
-    ctx2.moveTo(x, y);
-    ctx2.lineTo(x + width, y);
-    ctx2.lineTo(x + width + depth, y - depth);
-    ctx2.lineTo(x + depth, y - depth);
-    ctx2.closePath();
-    ctx2.fill();
-
-    const front = ctx2.createLinearGradient(x, y, x + width, y + height);
-    front.addColorStop(0, '#f59e0b');
-    front.addColorStop(1, '#9ca3af');
+    const front = ctx2.createLinearGradient(x, y, x + size, y + size);
+    front.addColorStop(0, '#f43f5e');
+    front.addColorStop(1, '#8b5cf6');
+    roundRectPath(ctx2, x, y, size, size, r);
     ctx2.fillStyle = front;
-    ctx2.fillRect(x, y, width, height);
-
-    ctx2.strokeStyle = '#374151';
-    ctx2.lineWidth = 1.2;
-    ctx2.strokeRect(x, y, width, height);
-
-    ctx2.fillStyle = '#d1d5db';
-    ctx2.fillRect(x + 7, y + 4, width - 14, height - 8);
-    ctx2.strokeStyle = '#4b5563';
-    ctx2.strokeRect(x + 7, y + 4, width - 14, height - 8);
-
+    ctx2.fill();
     ctx2.strokeStyle = '#374151';
     ctx2.lineWidth = 1.3;
-    ctx2.beginPath();
-    ctx2.arc(x + width / 2, y + height / 2, 4, 0, Math.PI * 2);
-    ctx2.stroke();
-    ctx2.beginPath();
-    ctx2.moveTo(x + width / 2 - 3, y + height / 2);
-    ctx2.lineTo(x + width / 2 + 3, y + height / 2);
-    ctx2.moveTo(x + width / 2, y + height / 2 - 3);
-    ctx2.lineTo(x + width / 2, y + height / 2 + 3);
     ctx2.stroke();
 
-    ctx2.fillStyle = '#111827';
-    ctx2.font = 'bold 10px Arial';
+    const b1 = { x: x + 1, y: y + size };
+    const b2 = { x: x + size, y: y + size };
+    const b3 = { x: x + size + previewDepth, y: y + size + previewDepth };
+    const b4 = { x: x + 1 + previewDepth, y: y + size + previewDepth };
+    function frontPoint(t, u) {
+      const nx = b1.x + (b2.x - b1.x) * u;
+      const ny = b1.y + (b2.y - b1.y) * u;
+      const fx = b4.x + (b3.x - b4.x) * u;
+      const fy = b4.y + (b3.y - b4.y) * u;
+      return { x: nx + (fx - nx) * t, y: ny + (fy - ny) * t };
+    }
+
+    const s1 = frontPoint(0.12, 0.12);
+    const s2 = frontPoint(0.12, 0.88);
+    const s3 = frontPoint(0.3, 0.88);
+    const s4 = frontPoint(0.3, 0.12);
+    ctx2.fillStyle = '#facc15';
+    ctx2.beginPath();
+    ctx2.moveTo(s1.x, s1.y);
+    ctx2.lineTo(s2.x, s2.y);
+    ctx2.lineTo(s3.x, s3.y);
+    ctx2.lineTo(s4.x, s4.y);
+    ctx2.closePath();
+    ctx2.fill();
+
+    const p1 = frontPoint(0.42, 0.2);
+    const p2 = frontPoint(0.42, 0.8);
+    const p3 = frontPoint(0.88, 0.8);
+    const p4 = frontPoint(0.88, 0.2);
+    ctx2.fillStyle = '#d1d5db';
+    ctx2.beginPath();
+    ctx2.moveTo(p1.x, p1.y);
+    ctx2.lineTo(p2.x, p2.y);
+    ctx2.lineTo(p3.x, p3.y);
+    ctx2.lineTo(p4.x, p4.y);
+    ctx2.closePath();
+    ctx2.fill();
+    ctx2.strokeStyle = '#4b5563';
+    ctx2.stroke();
+
+    const wheel = frontPoint(0.64, 0.5);
+    const wheelR = 2.2;
+    ctx2.strokeStyle = '#374151';
+    ctx2.lineWidth = 1.1;
+    ctx2.beginPath();
+    ctx2.arc(wheel.x, wheel.y, wheelR, 0, Math.PI * 2);
+    ctx2.stroke();
+    ctx2.beginPath();
+    ctx2.moveTo(wheel.x - wheelR * 0.75, wheel.y);
+    ctx2.lineTo(wheel.x + wheelR * 0.75, wheel.y);
+    ctx2.moveTo(wheel.x, wheel.y - wheelR * 0.75);
+    ctx2.lineTo(wheel.x, wheel.y + wheelR * 0.75);
+    ctx2.stroke();
+
+    const hpText = String(state.settings.powerboxHp);
+    ctx2.fillStyle = 'rgba(17,24,39,0.88)';
+    ctx2.fillRect(x + 2, y - 10, size - 4, 9);
+    ctx2.fillStyle = '#f9fafb';
+    ctx2.font = 'bold 9px Arial';
     ctx2.textAlign = 'center';
-    ctx2.textBaseline = 'alphabetic';
-    ctx2.fillText(String(state.settings.powerboxHp), x + width / 2 + 3, y - 4);
+    ctx2.textBaseline = 'middle';
+    ctx2.fillText(hpText, x + size / 2, y - 5.5);
   }
 
   function openSettings() {
@@ -643,56 +674,13 @@
   }
 
   function getProjectedBounds(item) {
-    if (item.type === 'rock') {
-      const ex = TERRAIN_GROW.left;
-      const ey = TERRAIN_GROW.up;
-      const width = item.w + ex;
-      const height = item.h * ROCK_HEIGHT_FACTOR + ey;
-      const rx = item.x - ex;
-      const ry = getBottomAlignedY(item.y, height) - ey;
-      const depth = width * TERRAIN_DEPTH_FACTOR;
-      return {
-        minX: rx,
-        minY: ry - depth,
-        maxX: rx + width + depth,
-        maxY: ry + height
-      };
-    }
-
-    if (item.type === 'grass') {
-      const ex = TERRAIN_GROW.left;
-      const ey = TERRAIN_GROW.up;
-      const size = getGrassRenderSize(item);
-      const grownSize = size + Math.max(ex, ey);
-      const gx = item.x + (item.w - size) / 2 - ex;
-      const depth = grownSize * TERRAIN_DEPTH_FACTOR;
-      const height = grownSize * GRASS_HEIGHT_FACTOR;
-      const gy = getBottomAlignedY(item.y + (item.h - size), height) - ey;
-      return {
-        minX: gx,
-        minY: gy - depth,
-        maxX: gx + grownSize + depth,
-        maxY: gy + height
-      };
-    }
-
-    if (item.type === 'powerbox') {
-      const depth = item.w * TERRAIN_DEPTH_FACTOR;
-      const py = getBottomAlignedY(item.y, item.h);
-      return {
-        minX: item.x,
-        minY: py - depth,
-        maxX: item.x + item.w + depth,
-        maxY: py + item.h
-      };
-    }
-
-    if (item.type === 'spawn') {
+    if (item.type === 'rock' || item.type === 'grass' || item.type === 'powerbox' || item.type === 'spawn') {
+      const depth = (item.type === 'spawn') ? 0 : Math.max(4, Math.round(Math.min(item.w, item.h) * 0.2));
       return {
         minX: item.x,
         minY: item.y,
-        maxX: item.x + item.w,
-        maxY: item.y + item.h
+        maxX: item.x + item.w + depth,
+        maxY: item.y + item.h + depth
       };
     }
 
@@ -779,205 +767,174 @@
     }
   }
 
+  function roundedRectPath(ctxRef, x, y, w, h, r) {
+    ctxRef.beginPath();
+    ctxRef.moveTo(x + r, y);
+    ctxRef.lineTo(x + w - r, y);
+    ctxRef.arcTo(x + w, y, x + w, y + r, r);
+    ctxRef.lineTo(x + w, y + h - r);
+    ctxRef.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctxRef.lineTo(x + r, y + h);
+    ctxRef.arcTo(x, y + h, x, y + h - r, r);
+    ctxRef.lineTo(x, y + r);
+    ctxRef.arcTo(x, y, x + r, y, r);
+    ctxRef.closePath();
+  }
+
+  function drawTopDownDepth(ctxRef, x, y, w, h, depth, sideColor, bottomColor) {
+    if (depth <= 0) return;
+
+    // Right face.
+    ctxRef.fillStyle = sideColor;
+    ctxRef.beginPath();
+    ctxRef.moveTo(x + w, y + 1);
+    ctxRef.lineTo(x + w + depth, y + depth + 1);
+    ctxRef.lineTo(x + w + depth, y + h + depth);
+    ctxRef.lineTo(x + w, y + h);
+    ctxRef.closePath();
+    ctxRef.fill();
+
+    // Bottom face.
+    ctxRef.fillStyle = bottomColor;
+    ctxRef.beginPath();
+    ctxRef.moveTo(x + 1, y + h);
+    ctxRef.lineTo(x + w, y + h);
+    ctxRef.lineTo(x + w + depth, y + h + depth);
+    ctxRef.lineTo(x + depth + 1, y + h + depth);
+    ctxRef.closePath();
+    ctxRef.fill();
+  }
+
   function drawStandingGameStone(ctx, x, y, width, height, radius, opts = {}) {
-    const hideRightFace = !!opts.hideRightFace;
-    const depth = width * 0.2;
-
-    const colors = {
-      top: '#e5e7eb',
-      front: '#9ca3af',
-      side: '#4b5563',
-      outline: '#1f2937',
-      highlight: 'rgba(255, 255, 255, 0.4)'
-    };
-
-    function pathRoundedRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.arcTo(x + w, y, x + w, y + r, r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-      ctx.lineTo(x + r, y + h);
-      ctx.arcTo(x, y + h, x, y + h - r, r);
-      ctx.lineTo(x, y + r);
-      ctx.arcTo(x, y, x + r, y, r);
-      ctx.closePath();
-    }
+    const r = Math.max(2, radius || Math.round(Math.min(width, height) * 0.14));
+    const depth = Math.max(4, Math.round(Math.min(width, height) * 0.2));
 
     ctx.save();
 
-    if (!hideRightFace) {
-      ctx.fillStyle = colors.side;
-      ctx.beginPath();
-      ctx.moveTo(x + width - radius, y);
-      ctx.lineTo(x + width + depth - radius, y - depth);
-      ctx.arcTo(x + width + depth, y - depth, x + width + depth, y - depth + radius, radius);
-      ctx.lineTo(x + width + depth, y + height - depth - radius);
-      ctx.arcTo(x + width + depth, y + height - depth, x + width + depth - radius, y + height - depth, radius);
-      ctx.lineTo(x + width - radius, y + height);
-      ctx.fill();
-      ctx.strokeStyle = colors.outline;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = colors.top;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
     ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + radius + depth, y - depth);
-    ctx.lineTo(x + width + depth - radius, y - depth);
-    ctx.lineTo(x + width - radius, y);
-    ctx.closePath();
+    ctx.ellipse(x + width * 0.6, y + height + depth + 2, width * 0.52, Math.max(3, depth * 0.85), 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
 
-    pathRoundedRect(ctx, x, y, width, height, radius);
+    drawTopDownDepth(ctx, x, y, width, height, depth, '#5e6672', '#4f5662');
+
+    roundedRectPath(ctx, x, y, width, height, r);
+
     const grad = ctx.createLinearGradient(x, y, x + width, y + height);
-    grad.addColorStop(0, colors.front);
-    grad.addColorStop(1, '#6b7280');
+    grad.addColorStop(0, '#d3d7de');
+    grad.addColorStop(1, '#7b8391');
     ctx.fillStyle = grad;
     ctx.fill();
-    ctx.stroke();
 
+    ctx.save();
     ctx.clip();
-    ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 24; i++) {
       const px = x + Math.random() * width;
       const py = y + Math.random() * height;
-      ctx.fillRect(px, py, 2, 2);
+      const s = 1 + Math.random() * 2;
+      ctx.fillStyle = `rgba(${95 + Math.random() * 40}, ${100 + Math.random() * 40}, ${110 + Math.random() * 40}, 0.28)`;
+      ctx.fillRect(px, py, s, s);
     }
+    ctx.restore();
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + width * 0.2, y + height * 0.1);
-    ctx.lineTo(x + width * 0.3, y + height * 0.25);
-    ctx.lineTo(x + width * 0.25, y + height * 0.4);
+    ctx.strokeStyle = '#1f2937';
+    ctx.lineWidth = 1.2;
     ctx.stroke();
 
-    ctx.strokeStyle = colors.highlight;
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x + radius, y + 4);
-    ctx.lineTo(x + width - radius, y + 4);
+    ctx.moveTo(x + r + 1, y + 3);
+    ctx.lineTo(x + width - r - 1, y + 3);
     ctx.stroke();
-
     ctx.restore();
   }
 
   function draw3DGrassBlock(ctx, x, y, size, radius, opts = {}) {
-    const hideRightFace = !!opts.hideRightFace;
-    const depth = size * TERRAIN_DEPTH_FACTOR;
-    const height = size * GRASS_HEIGHT_FACTOR;
-
-    const colors = {
-      grassTop: '#4ade80',
-      grassSide: '#16a34a',
-      dirtFront: '#92400e',
-      dirtSide: '#451a03',
-      outline: '#1f2937',
-      highlight: 'rgba(255, 255, 255, 0.3)'
-    };
-
-    function pathRoundedRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.arcTo(x + w, y, x + w, y + r, r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-      ctx.lineTo(x + r, y + h);
-      ctx.arcTo(x, y + h, x, y + h - r, r);
-      ctx.lineTo(x, y + r);
-      ctx.arcTo(x, y, x + r, y, r);
-      ctx.closePath();
-    }
+    const r = Math.max(2, radius || Math.round(size * 0.1));
+    const depth = Math.max(4, Math.round(size * 0.2));
 
     ctx.save();
 
-    if (!hideRightFace) {
-      ctx.fillStyle = colors.dirtSide;
-      ctx.beginPath();
-      ctx.moveTo(x + size - radius, y);
-      ctx.lineTo(x + size + depth - radius, y - depth);
-      ctx.arcTo(x + size + depth, y - depth, x + size + depth, y - depth + radius, radius);
-      ctx.lineTo(x + size + depth, y + height - depth - radius);
-      ctx.arcTo(x + size + depth, y + height - depth, x + size + depth - radius, y + height - depth, radius);
-      ctx.lineTo(x + size - radius, y + height);
-      ctx.fill();
-
-      ctx.fillStyle = colors.grassSide;
-      ctx.beginPath();
-      ctx.moveTo(x + size, y);
-      ctx.lineTo(x + size + depth, y - depth);
-      ctx.lineTo(x + size + depth, y - depth + height * 0.72);
-      ctx.lineTo(x + size, y + height * 0.72);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(6, 78, 59, 0.65)';
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = colors.grassTop;
+    ctx.fillStyle = 'rgba(20, 83, 45, 0.22)';
     ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + radius + depth, y - depth);
-    ctx.lineTo(x + size + depth - radius, y - depth);
-    ctx.lineTo(x + size - radius, y);
+    ctx.ellipse(x + size * 0.6, y + size + depth + 2, size * 0.54, Math.max(3, depth * 0.9), 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    drawTopDownDepth(ctx, x, y, size, size, depth, '#2f8f3a', '#2b7f38');
+
+    // Keep 75% green / 25% brown on the front depth faces (not on top face).
+    const tRight = 0.55;
+    const tBottom = 0.55;
+
+    // Right face points.
+    const r1 = { x: x + size, y: y + 1 };
+    const r2 = { x: x + size + depth, y: y + depth + 1 };
+    const r3 = { x: x + size + depth, y: y + size + depth };
+    const r4 = { x: x + size, y: y + size };
+    const rr1 = { x: r1.x + (r2.x - r1.x) * tRight, y: r1.y + (r2.y - r1.y) * tRight };
+    const rr2 = { x: r4.x + (r3.x - r4.x) * tRight, y: r4.y + (r3.y - r4.y) * tRight };
+    ctx.fillStyle = '#7a4a22';
+    ctx.beginPath();
+    ctx.moveTo(rr1.x, rr1.y);
+    ctx.lineTo(r2.x, r2.y);
+    ctx.lineTo(r3.x, r3.y);
+    ctx.lineTo(rr2.x, rr2.y);
     ctx.closePath();
     ctx.fill();
-    ctx.stroke();
 
-    pathRoundedRect(ctx, x, y, size, height, radius);
-    ctx.fillStyle = colors.dirtFront;
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.save();
-    pathRoundedRect(ctx, x, y, size, height, radius);
-    ctx.clip();
-
-    ctx.fillStyle = colors.grassSide;
+    // Bottom/front face points.
+    const b1 = { x: x + 1, y: y + size };
+    const b2 = { x: x + size, y: y + size };
+    const b3 = { x: x + size + depth, y: y + size + depth };
+    const b4 = { x: x + depth + 1, y: y + size + depth };
+    const bb1 = { x: b1.x + (b4.x - b1.x) * tBottom, y: b1.y + (b4.y - b1.y) * tBottom };
+    const bb2 = { x: b2.x + (b3.x - b2.x) * tBottom, y: b2.y + (b3.y - b2.y) * tBottom };
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + size, y);
-    ctx.lineTo(x + size, y + height * 0.75);
-    ctx.lineTo(x, y + height * 0.75);
+    ctx.moveTo(bb1.x, bb1.y);
+    ctx.lineTo(bb2.x, bb2.y);
+    ctx.lineTo(b3.x, b3.y);
+    ctx.lineTo(b4.x, b4.y);
     ctx.closePath();
     ctx.fill();
-    ctx.stroke();
-    ctx.restore();
+
+    roundedRectPath(ctx, x, y, size, size, r);
+
+    const grad = ctx.createLinearGradient(x, y, x + size, y + size);
+    grad.addColorStop(0, '#67d66f');
+    grad.addColorStop(1, '#2e8c3d');
+    ctx.fillStyle = grad;
+    ctx.fill();
 
     ctx.save();
-    pathRoundedRect(ctx, x, y, size, height, radius);
     ctx.clip();
-    ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    for (let i = 0; i < 30; i++) {
-      ctx.fillRect(x + Math.random() * size, y + height * 0.4 + Math.random() * height * 0.6, 2, 2);
+    for (let i = 0; i < 46; i++) {
+      const px = x + Math.random() * size;
+      const py = y + Math.random() * size;
+      const blade = 1 + Math.random() * 2;
+      ctx.fillStyle = `rgba(${30 + Math.random() * 40}, ${130 + Math.random() * 80}, ${25 + Math.random() * 25}, 0.5)`;
+      ctx.fillRect(px, py, blade, blade);
     }
     ctx.restore();
 
-    ctx.strokeStyle = colors.highlight;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y + 3);
-    ctx.lineTo(x + size - radius, y + 3);
+    ctx.strokeStyle = 'rgba(26, 84, 39, 0.8)';
+    ctx.lineWidth = 1.2;
     ctx.stroke();
 
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(x + r + 1, y + 3);
+    ctx.lineTo(x + size - r - 1, y + 3);
+    ctx.stroke();
     ctx.restore();
   }
 
   function drawPowerSafeCrate(ctx, x, y, size, opts = {}) {
-    const hideRightFace = !!opts.hideRightFace;
-    const depth = size * TERRAIN_DEPTH_FACTOR;
-
+    const depth = Math.max(4, Math.round(size * 0.2));
     const colors = {
-      top: '#facc15',
-      frontA: '#f59e0b',
-      frontB: '#9ca3af',
-      side: '#6b7280',
+      top: '#f43f5e',
+      bottom: '#8b5cf6',
       panel: '#d1d5db',
       panelEdge: '#4b5563',
       outline: '#1f2937',
@@ -987,63 +944,84 @@
 
     ctx.save();
 
-    if (!hideRightFace) {
-      ctx.fillStyle = colors.side;
-      ctx.beginPath();
-      ctx.moveTo(x + size, y);
-      ctx.lineTo(x + size + depth, y - depth);
-      ctx.lineTo(x + size + depth, y + size - depth);
-      ctx.lineTo(x + size, y + size);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(31, 41, 55, 0.55)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = colors.top;
+    ctx.fillStyle = 'rgba(17, 24, 39, 0.22)';
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + size, y);
-    ctx.lineTo(x + size + depth, y - depth);
-    ctx.lineTo(x + depth, y - depth);
-    ctx.closePath();
+    ctx.ellipse(x + size * 0.62, y + size + depth + 2, size * 0.5, Math.max(3, depth * 0.9), 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(120, 53, 15, 0.45)';
-    ctx.lineWidth = 1.1;
-    ctx.stroke();
+
+    drawTopDownDepth(ctx, x, y, size, size, depth, '#06b6d4', '#f97316');
 
     const front = ctx.createLinearGradient(x, y, x + size, y + size);
-    front.addColorStop(0, colors.frontA);
-    front.addColorStop(1, colors.frontB);
+    front.addColorStop(0, colors.top);
+    front.addColorStop(1, colors.bottom);
     ctx.fillStyle = front;
     ctx.fillRect(x, y, size, size);
+
     ctx.strokeStyle = colors.outline;
     ctx.lineWidth = 1.4;
     ctx.strokeRect(x, y, size, size);
 
-    const panelX = x + size * 0.2;
-    const panelY = y + size * 0.16;
-    const panelW = size * 0.6;
-    const panelH = size * 0.62;
-    ctx.fillStyle = colors.panel;
-    ctx.fillRect(panelX, panelY, panelW, panelH);
-    ctx.strokeStyle = colors.panelEdge;
-    ctx.strokeRect(panelX, panelY, panelW, panelH);
+    const b1 = { x: x + 1, y: y + size };
+    const b2 = { x: x + size, y: y + size };
+    const b3 = { x: x + size + depth, y: y + size + depth };
+    const b4 = { x: x + depth + 1, y: y + size + depth };
+    function frontPoint(t, u) {
+      const nx = b1.x + (b2.x - b1.x) * u;
+      const ny = b1.y + (b2.y - b1.y) * u;
+      const fx = b4.x + (b3.x - b4.x) * u;
+      const fy = b4.y + (b3.y - b4.y) * u;
+      return { x: nx + (fx - nx) * t, y: ny + (fy - ny) * t };
+    }
 
-    const wheelX = panelX + panelW * 0.5;
-    const wheelY = panelY + panelH * 0.52;
-    const wheelR = Math.max(3, size * 0.09);
-    ctx.strokeStyle = colors.panelEdge;
-    ctx.lineWidth = 1.4;
+    const s1 = frontPoint(0.12, 0.12);
+    const s2 = frontPoint(0.12, 0.88);
+    const s3 = frontPoint(0.32, 0.88);
+    const s4 = frontPoint(0.32, 0.12);
+    ctx.fillStyle = '#facc15';
     ctx.beginPath();
-    ctx.arc(wheelX, wheelY, wheelR, 0, Math.PI * 2);
+    ctx.moveTo(s1.x, s1.y);
+    ctx.lineTo(s2.x, s2.y);
+    ctx.lineTo(s3.x, s3.y);
+    ctx.lineTo(s4.x, s4.y);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    const sh1 = frontPoint(0.16, 0.2);
+    const sh2 = frontPoint(0.16, 0.8);
+    ctx.moveTo(sh1.x, sh1.y);
+    ctx.lineTo(sh2.x, sh2.y);
+    ctx.stroke();
+
+    const p1 = frontPoint(0.46, 0.2);
+    const p2 = frontPoint(0.46, 0.8);
+    const p3 = frontPoint(0.9, 0.8);
+    const p4 = frontPoint(0.9, 0.2);
+    ctx.fillStyle = colors.panel;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = colors.panelEdge;
+    ctx.stroke();
+
+    const wheel = frontPoint(0.68, 0.5);
+    const wheelR = Math.max(3, size * 0.075);
+    ctx.strokeStyle = colors.panelEdge;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(wheel.x, wheel.y, wheelR, 0, Math.PI * 2);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(wheelX - wheelR * 0.8, wheelY);
-    ctx.lineTo(wheelX + wheelR * 0.8, wheelY);
-    ctx.moveTo(wheelX, wheelY - wheelR * 0.8);
-    ctx.lineTo(wheelX, wheelY + wheelR * 0.8);
+    ctx.moveTo(wheel.x - wheelR * 0.8, wheel.y);
+    ctx.lineTo(wheel.x + wheelR * 0.8, wheel.y);
+    ctx.moveTo(wheel.x, wheel.y - wheelR * 0.8);
+    ctx.lineTo(wheel.x, wheel.y + wheelR * 0.8);
     ctx.stroke();
 
     // HP display above the crate.
@@ -1054,7 +1032,7 @@
     const hpPadX = 6;
     const hpPadY = 4;
     const hpX = x + size / 2 - textW / 2 - hpPadX;
-    const hpY = y - depth - fontSize - 7;
+    const hpY = y - fontSize - 7;
     const hpW = textW + hpPadX * 2;
     const hpH = fontSize + hpPadY * 2;
 
@@ -1073,39 +1051,22 @@
   }
 
   function draw3DBlock(item, terrainAdjacency, viewState) {
-    const hideRightFace = false;
     const parallax = viewState || { blockOffsetX: 0, blockOffsetY: 0 };
     const offsetX = parallax.blockOffsetX || 0;
     const offsetY = parallax.blockOffsetY || 0;
 
     if (item.type === 'rock') {
-      const ex = TERRAIN_GROW.left;
-      const ey = TERRAIN_GROW.up;
-      const width = item.w + ex;
-      const height = item.h * ROCK_HEIGHT_FACTOR + ey;
-      const rx = item.x - ex + offsetX;
-      const ry = getBottomAlignedY(item.y, height) - ey + offsetY;
-      const radius = 0;
-      drawStandingGameStone(ctx, rx, ry, width, height, radius, { hideRightFace });
+      drawStandingGameStone(ctx, item.x + offsetX, item.y + offsetY, item.w, item.h, 3);
       return;
     }
 
     if (item.type === 'grass') {
-      const ex = TERRAIN_GROW.left;
-      const ey = TERRAIN_GROW.up;
-      const size = getGrassRenderSize(item);
-      const grownSize = size + Math.max(ex, ey);
-      const gx = item.x + (item.w - size) / 2 - ex + offsetX;
-      const radius = 0;
-      const gy = getBottomAlignedY(item.y + (item.h - size), grownSize * GRASS_HEIGHT_FACTOR) - ey + offsetY;
-      draw3DGrassBlock(ctx, gx, gy, grownSize, radius, { hideRightFace });
+      draw3DGrassBlock(ctx, item.x + offsetX, item.y + offsetY, item.w, 3);
       return;
     }
 
     if (item.type === 'powerbox') {
-      const px = item.x + offsetX;
-      const py = getBottomAlignedY(item.y, item.h) + offsetY;
-      drawPowerSafeCrate(ctx, px, py, item.w, { hideRightFace });
+      drawPowerSafeCrate(ctx, item.x + offsetX, item.y + offsetY, item.w);
       return;
     }
 
@@ -1245,6 +1206,11 @@
     };
   }
 
+  function compareItemsByLayer(a, b) {
+    // Draw upper-screen items first so lower-screen items stay visually on top.
+    return (a.y - b.y) || (a.x - b.x);
+  }
+
   function draw() {
     normalizeTerrainItemsToGridSize();
     clear();
@@ -1252,7 +1218,7 @@
     const viewState = getParallaxState();
     ctx.save();
     ctx.translate(-camera.x, -camera.y);
-    const sorted = [...state.items].sort((a, b) => (a.y - b.y) || (a.x - b.x));
+    const sorted = [...state.items].sort(compareItemsByLayer);
     for (const it of sorted) drawItem(it, terrainAdjacency, viewState);
     ctx.restore();
     updateCameraHud();
@@ -1260,7 +1226,7 @@
   }
 
   function getTopItemAtWorld(worldX, worldY) {
-    const sorted = [...state.items].sort((a, b) => (a.y - b.y) || (a.x - b.x));
+    const sorted = [...state.items].sort(compareItemsByLayer);
     for (let i = sorted.length - 1; i >= 0; i--) {
       const it = sorted[i];
       const b = getProjectedBounds(it);
@@ -1344,7 +1310,7 @@
 
     const { cssX, cssY } = eventToCanvasCss(ev);
     const { worldX, worldY } = canvasToWorld(cssX, cssY);
-    const sorted = [...state.items].sort((a, b) => (a.y - b.y) || (a.x - b.x));
+    const sorted = [...state.items].sort(compareItemsByLayer);
     let hitAny = false;
     for (let i = sorted.length - 1; i >= 0; i--) {
       const it = sorted[i];
