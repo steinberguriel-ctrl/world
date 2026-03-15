@@ -44,11 +44,13 @@
         <span>אבן</span>
       </div>
       <div class="resource" data-type="powerbox">
-        <canvas id="powerboxPreviewCanvas" class="resource-canvas" width="80" height="48" aria-label="power box preview"></canvas>
+        <canvas id="powerboxPreviewCanvas" class="resource-canvas" width="80" height="48"
+          aria-label="power box preview"></canvas>
         <span>תיבת כוח</span>
       </div>
       <div class="resource" data-type="spawn">
-        <canvas id="spawnPreviewCanvas" class="resource-canvas" width="80" height="48" aria-label="spawn preview"></canvas>
+        <canvas id="spawnPreviewCanvas" class="resource-canvas" width="80" height="48"
+          aria-label="spawn preview"></canvas>
         <span>הולדה</span>
       </div>
       <hr>
@@ -82,11 +84,17 @@
         <div class="settings-card world-select-card" role="dialog" aria-modal="true" aria-labelledby="worldSelectTitle">
           <h3 id="worldSelectTitle">בחירת עולם</h3>
           <div class="world-select-grid">
-            <button type="button" class="world-option" data-world-slot="1" data-world-name="סולו / זוג / שלישיה">1. סולו / זוג / שלישיה</button>
-            <button type="button" class="world-option locked-now" data-world-slot="2" data-world-name="שוד">2. שוד</button>
-            <button type="button" class="world-option locked-now" data-world-slot="3" data-world-name="כדורגל">3. כדורגל</button>
-            <button type="button" class="world-option locked-now" data-world-slot="4" data-world-name="כדורסל">4. כדורסל</button>
-            <button type="button" class="world-option locked-now" data-world-slot="5" data-world-name="כדור עף">5. כדור עף</button>
+            <button type="button" class="world-option" data-world-slot="1" data-world-name="סולו / זוג / שלישיה">1. סולו
+              /
+              זוג / שלישיה</button>
+            <button type="button" class="world-option locked-now" data-world-slot="2" data-world-name="שוד">2.
+              שוד</button>
+            <button type="button" class="world-option locked-now" data-world-slot="3" data-world-name="כדורגל">3.
+              כדורגל</button>
+            <button type="button" class="world-option locked-now" data-world-slot="4" data-world-name="כדורסל">4.
+              כדורסל</button>
+            <button type="button" class="world-option locked-now" data-world-slot="5" data-world-name="כדור עף">5. כדור
+              עף</button>
             <button type="button" class="world-option empty-slot" data-world-slot="6" disabled>6.</button>
             <button type="button" class="world-option empty-slot" data-world-slot="7" disabled>7.</button>
             <button type="button" class="world-option empty-slot" data-world-slot="8" disabled>8.</button>
@@ -99,7 +107,6 @@
           </div>
         </div>
       </div>
-
       <div id="settingsModal" class="settings-modal" hidden>
         <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
           <h3 id="settingsTitle">הגדרות</h3>
@@ -128,7 +135,7 @@
 
   <script src="gae.js"></script>
   <script>
-    // ציור דשא בפלטה - בלוק תלת ממדי קטן
+    // ציור דשא בפלטה - מבט מלמעלה
     (function () {
       const c = document.querySelector('.resource[data-type="grass"] .resource-canvas');
       if (!c) return;
@@ -141,61 +148,85 @@
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H);
 
-      const top = [
-        { x: 20, y: 12 },
-        { x: 50, y: 12 },
-        { x: 62, y: 20 },
-        { x: 32, y: 20 }
-      ];
-      const front = [
-        { x: 32, y: 20 },
-        { x: 62, y: 20 },
-        { x: 62, y: 36 },
-        { x: 32, y: 36 }
-      ];
-      const side = [
-        { x: 20, y: 12 },
-        { x: 32, y: 20 },
-        { x: 32, y: 36 },
-        { x: 20, y: 28 }
-      ];
+      const size = 30;
+      const x = Math.round((W - size) / 2);
+      const y = Math.round((H - size) / 2);
+      const depth = 6;
 
-      function poly(points, fill) {
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-        ctx.closePath();
-        ctx.fillStyle = fill;
-        ctx.fill();
-      }
-
-      poly(front, '#2f8f3a');
-      poly(side, '#1f6f2b');
-      poly(top, '#53c65f');
-
-      // טקסטורת עשב עדינה על החלק העליון.
-      ctx.save();
+      ctx.fillStyle = 'rgba(20, 83, 45, 0.2)';
       ctx.beginPath();
-      ctx.moveTo(top[0].x, top[0].y);
-      for (let i = 1; i < top.length; i++) ctx.lineTo(top[i].x, top[i].y);
-      ctx.closePath();
-      ctx.clip();
-      for (let i = 0; i < 80; i++) {
-        const x = 20 + Math.random() * 42;
-        const y = 10 + Math.random() * 12;
-        ctx.fillStyle = `rgba(${40 + Math.random() * 30}, ${150 + Math.random() * 80}, ${35 + Math.random() * 25}, 0.48)`;
-        ctx.fillRect(x, y, 2, 2);
-      }
-      ctx.restore();
+      ctx.ellipse(x + size * 0.6, y + size + depth + 1, size * 0.52, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-      ctx.strokeStyle = 'rgba(32, 48, 24, 0.55)';
-      ctx.lineWidth = 1;
-      poly(front, 'rgba(0,0,0,0)');
-      poly(side, 'rgba(0,0,0,0)');
-      poly(top, 'rgba(0,0,0,0)');
+      ctx.fillStyle = '#2f8f3a';
+      ctx.beginPath();
+      ctx.moveTo(x + size, y + 1);
+      ctx.lineTo(x + size + depth, y + depth + 1);
+      ctx.lineTo(x + size + depth, y + size + depth);
+      ctx.lineTo(x + size, y + size);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#2b7f38';
+      ctx.beginPath();
+      ctx.moveTo(x + 1, y + size);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x + size + depth, y + size + depth);
+      ctx.lineTo(x + depth + 1, y + size + depth);
+      ctx.closePath();
+      ctx.fill();
+
+      // 75% green / 25% brown on front faces.
+      const tRight = 0.55;
+      const tBottom = 0.55;
+      const r1 = { x: x + size, y: y + 1 };
+      const r2 = { x: x + size + depth, y: y + depth + 1 };
+      const r3 = { x: x + size + depth, y: y + size + depth };
+      const r4 = { x: x + size, y: y + size };
+      const rr1 = { x: r1.x + (r2.x - r1.x) * tRight, y: r1.y + (r2.y - r1.y) * tRight };
+      const rr2 = { x: r4.x + (r3.x - r4.x) * tRight, y: r4.y + (r3.y - r4.y) * tRight };
+      ctx.fillStyle = '#7a4a22';
+      ctx.beginPath();
+      ctx.moveTo(rr1.x, rr1.y);
+      ctx.lineTo(r2.x, r2.y);
+      ctx.lineTo(r3.x, r3.y);
+      ctx.lineTo(rr2.x, rr2.y);
+      ctx.closePath();
+      ctx.fill();
+
+      const b1 = { x: x + 1, y: y + size };
+      const b2 = { x: x + size, y: y + size };
+      const b3 = { x: x + size + depth, y: y + size + depth };
+      const b4 = { x: x + depth + 1, y: y + size + depth };
+      const bb1 = { x: b1.x + (b4.x - b1.x) * tBottom, y: b1.y + (b4.y - b1.y) * tBottom };
+      const bb2 = { x: b2.x + (b3.x - b2.x) * tBottom, y: b2.y + (b3.y - b2.y) * tBottom };
+      ctx.beginPath();
+      ctx.moveTo(bb1.x, bb1.y);
+      ctx.lineTo(bb2.x, bb2.y);
+      ctx.lineTo(b3.x, b3.y);
+      ctx.lineTo(b4.x, b4.y);
+      ctx.closePath();
+      ctx.fill();
+
+      const g = ctx.createLinearGradient(x, y, x + size, y + size);
+      g.addColorStop(0, '#67d66f');
+      g.addColorStop(1, '#2e8c3d');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, size, size);
+
+      for (let i = 0; i < 45; i++) {
+        const px = x + Math.random() * size;
+        const py = y + Math.random() * size;
+        ctx.fillStyle = `rgba(${30 + Math.random() * 40}, ${130 + Math.random() * 80}, ${25 + Math.random() * 25}, 0.52)`;
+        ctx.fillRect(px, py, 1 + Math.random() * 2, 1 + Math.random() * 2);
+      }
+
+      ctx.strokeStyle = 'rgba(26, 84, 39, 0.8)';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(x, y, size, size);
     })();
 
-    // ציור אבן בפלטה - בלוק אבן תלת ממדי כמו בגרירה
+    // ציור אבן בפלטה - מבט מלמעלה
     (function () {
       const c = document.querySelector('.resource[data-type="rock"] .resource-canvas');
       if (!c) return;
@@ -208,73 +239,70 @@
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
-      const x = 18;
-      const y = 13;
-      const width = 36;
-      const height = 24;
-      const depth = 9;
-      const radius = 4;
+      const size = 30;
+      const x = Math.round((W - size) / 2);
+      const y = Math.round((H - size) / 2);
+      const r = 5;
+      const depth = 6;
 
-      function roundedRectPath(x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.arcTo(x + w, y, x + w, y + r, r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-        ctx.lineTo(x + r, y + h);
-        ctx.arcTo(x, y + h, x, y + h - r, r);
-        ctx.lineTo(x, y + r);
-        ctx.arcTo(x, y, x + r, y, r);
-        ctx.closePath();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+      ctx.beginPath();
+      ctx.ellipse(x + size * 0.6, y + size + depth + 1, size * 0.5, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#5e6672';
+      ctx.beginPath();
+      ctx.moveTo(x + size, y + 1);
+      ctx.lineTo(x + size + depth, y + depth + 1);
+      ctx.lineTo(x + size + depth, y + size + depth);
+      ctx.lineTo(x + size, y + size);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#4f5662';
+      ctx.beginPath();
+      ctx.moveTo(x + 1, y + size);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x + size + depth, y + size + depth);
+      ctx.lineTo(x + depth + 1, y + size + depth);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + size - r, y);
+      ctx.arcTo(x + size, y, x + size, y + r, r);
+      ctx.lineTo(x + size, y + size - r);
+      ctx.arcTo(x + size, y + size, x + size - r, y + size, r);
+      ctx.lineTo(x + r, y + size);
+      ctx.arcTo(x, y + size, x, y + size - r, r);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+
+      const g = ctx.createLinearGradient(x, y, x + size, y + size);
+      g.addColorStop(0, '#c4c8d0');
+      g.addColorStop(1, '#7a818e');
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      ctx.save();
+      ctx.clip();
+      for (let i = 0; i < 22; i++) {
+        const px = x + Math.random() * size;
+        const py = y + Math.random() * size;
+        const s = 1 + Math.random() * 2;
+        ctx.fillStyle = `rgba(${95 + Math.random() * 40}, ${100 + Math.random() * 40}, ${110 + Math.random() * 40}, 0.28)`;
+        ctx.fillRect(px, py, s, s);
       }
-
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.beginPath();
-      ctx.ellipse(x + width / 2 + depth / 2, y + height + 4, width / 1.6, depth / 2.2, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#4b5563';
-      ctx.beginPath();
-      ctx.moveTo(x + width - radius, y);
-      ctx.lineTo(x + width + depth - radius, y - depth);
-      ctx.arcTo(x + width + depth, y - depth, x + width + depth, y - depth + radius, radius);
-      ctx.lineTo(x + width + depth, y + height - depth - radius);
-      ctx.arcTo(x + width + depth, y + height - depth, x + width + depth - radius, y + height - depth, radius);
-      ctx.lineTo(x + width - radius, y + height);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#e5e7eb';
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + radius + depth, y - depth);
-      ctx.lineTo(x + width + depth - radius, y - depth);
-      ctx.lineTo(x + width - radius, y);
-      ctx.closePath();
-      ctx.fill();
-
-      const frontGrad = ctx.createLinearGradient(x, y, x + width, y + height);
-      frontGrad.addColorStop(0, '#9ca3af');
-      frontGrad.addColorStop(1, '#6b7280');
-      roundedRectPath(x, y, width, height, radius);
-      ctx.fillStyle = frontGrad;
-      ctx.fill();
+      ctx.restore();
 
       ctx.strokeStyle = '#1f2937';
-      ctx.lineWidth = 1.4;
-      roundedRectPath(x, y, width, height, radius);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y + 3);
-      ctx.lineTo(x + width - radius, y + 3);
+      ctx.lineWidth = 1.3;
       ctx.stroke();
     })();
 
-    // ציור תיבת כוח בפלטה - כספת צהובה אפורה עם חיים
+    // ציור תיבת כוח בפלטה - מבט מלמעלה
     (function () {
       const c = document.querySelector('.resource[data-type="powerbox"] .resource-canvas');
       if (!c) return;
@@ -287,67 +315,106 @@
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
-      const x = 20;
-      const y = 14;
-      const width = 30;
-      const height = 20;
-      const depth = 7;
+      const size = 28;
+      const x = Math.round((W - size) / 2);
+      const y = Math.round((H - size) / 2);
+      const depth = 6;
 
-      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.fillStyle = 'rgba(17, 24, 39, 0.22)';
       ctx.beginPath();
-      ctx.ellipse(x + width / 2 + depth / 2, y + height + 4, width / 1.6, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + size * 0.62, y + size + depth + 1, size * 0.48, 3, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = '#6b7280';
+      ctx.fillStyle = '#06b6d4';
       ctx.beginPath();
-      ctx.moveTo(x + width, y);
-      ctx.lineTo(x + width + depth, y - depth);
-      ctx.lineTo(x + width + depth, y + height - depth);
-      ctx.lineTo(x + width, y + height);
+      ctx.moveTo(x + size, y + 1);
+      ctx.lineTo(x + size + depth, y + depth + 1);
+      ctx.lineTo(x + size + depth, y + size + depth);
+      ctx.lineTo(x + size, y + size);
       ctx.closePath();
       ctx.fill();
 
-      ctx.fillStyle = '#facc15';
+      ctx.fillStyle = '#f97316';
       ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + width, y);
-      ctx.lineTo(x + width + depth, y - depth);
-      ctx.lineTo(x + depth, y - depth);
+      ctx.moveTo(x + 1, y + size);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x + size + depth, y + size + depth);
+      ctx.lineTo(x + depth + 1, y + size + depth);
       ctx.closePath();
       ctx.fill();
 
-      const front = ctx.createLinearGradient(x, y, x + width, y + height);
-      front.addColorStop(0, '#f59e0b');
-      front.addColorStop(1, '#9ca3af');
+      const front = ctx.createLinearGradient(x, y, x + size, y + size);
+      front.addColorStop(0, '#f43f5e');
+      front.addColorStop(1, '#8b5cf6');
       ctx.fillStyle = front;
-      ctx.fillRect(x, y, width, height);
-
-      ctx.strokeStyle = '#374151';
-      ctx.lineWidth = 1.2;
-      ctx.strokeRect(x, y, width, height);
-
-      ctx.fillStyle = '#d1d5db';
-      ctx.fillRect(x + 7, y + 4, width - 14, height - 8);
-      ctx.strokeStyle = '#4b5563';
-      ctx.strokeRect(x + 7, y + 4, width - 14, height - 8);
+      ctx.fillRect(x, y, size, size);
 
       ctx.strokeStyle = '#374151';
       ctx.lineWidth = 1.3;
+      ctx.strokeRect(x, y, size, size);
+
+      const b1 = { x: x + 1, y: y + size };
+      const b2 = { x: x + size, y: y + size };
+      const b3 = { x: x + size + depth, y: y + size + depth };
+      const b4 = { x: x + depth + 1, y: y + size + depth };
+      function frontPoint(t, u) {
+        const nx = b1.x + (b2.x - b1.x) * u;
+        const ny = b1.y + (b2.y - b1.y) * u;
+        const fx = b4.x + (b3.x - b4.x) * u;
+        const fy = b4.y + (b3.y - b4.y) * u;
+        return { x: nx + (fx - nx) * t, y: ny + (fy - ny) * t };
+      }
+
+      const s1 = frontPoint(0.12, 0.12);
+      const s2 = frontPoint(0.12, 0.88);
+      const s3 = frontPoint(0.3, 0.88);
+      const s4 = frontPoint(0.3, 0.12);
+      ctx.fillStyle = '#facc15';
       ctx.beginPath();
-      ctx.arc(x + width / 2, y + height / 2, 4, 0, Math.PI * 2);
+      ctx.moveTo(s1.x, s1.y);
+      ctx.lineTo(s2.x, s2.y);
+      ctx.lineTo(s3.x, s3.y);
+      ctx.lineTo(s4.x, s4.y);
+      ctx.closePath();
+      ctx.fill();
+
+      const p1 = frontPoint(0.42, 0.2);
+      const p2 = frontPoint(0.42, 0.8);
+      const p3 = frontPoint(0.88, 0.8);
+      const p4 = frontPoint(0.88, 0.2);
+      ctx.fillStyle = '#d1d5db';
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(p4.x, p4.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#4b5563';
+      ctx.stroke();
+
+      const wheel = frontPoint(0.64, 0.5);
+      const wheelR = 2.2;
+      ctx.strokeStyle = '#374151';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(wheel.x, wheel.y, wheelR, 0, Math.PI * 2);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(x + width / 2 - 3, y + height / 2);
-      ctx.lineTo(x + width / 2 + 3, y + height / 2);
-      ctx.moveTo(x + width / 2, y + height / 2 - 3);
-      ctx.lineTo(x + width / 2, y + height / 2 + 3);
+      ctx.moveTo(wheel.x - wheelR * 0.75, wheel.y);
+      ctx.lineTo(wheel.x + wheelR * 0.75, wheel.y);
+      ctx.moveTo(wheel.x, wheel.y - wheelR * 0.75);
+      ctx.lineTo(wheel.x, wheel.y + wheelR * 0.75);
       ctx.stroke();
 
       const hp = Number(window.__builderPowerboxHp || 1000);
-      ctx.fillStyle = '#111827';
-      ctx.font = 'bold 10px Arial';
+      ctx.fillStyle = 'rgba(17,24,39,0.88)';
+      ctx.fillRect(x + 2, y - 10, size - 4, 9);
+      ctx.fillStyle = '#f9fafb';
+      ctx.font = 'bold 9px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(String(hp), x + width / 2 + 3, y - 4);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(hp), x + size / 2, y - 5.5);
     })();
 
     // ציור הולדה בפלטה - עיגול אפור
@@ -383,4 +450,5 @@
     })();
   </script>
 </body>
+
 </html>
