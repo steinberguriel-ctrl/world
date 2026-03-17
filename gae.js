@@ -7,9 +7,9 @@
   let previewBtn, previewModal, previewCloseBtn, previewWorldCanvas;
 
   function getWorldBounds() {
-    // Compute the bounding box of all items, fallback to world size if empty
+    // תמיד מחזיר את גבולות העולם המלא
+    const ws = getActiveWorldSize();
     if (!state.items.length) {
-      const ws = getActiveWorldSize();
       return { minX: 0, minY: 0, maxX: ws.width, maxY: ws.height };
     }
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -20,6 +20,11 @@
       maxX = Math.max(maxX, b.maxX);
       maxY = Math.max(maxY, b.maxY);
     }
+    // תיקון: אם יש חפצים רק באמצע, עדיין תראה את כל העולם
+    minX = Math.min(minX, 0);
+    minY = Math.min(minY, 0);
+    maxX = Math.max(maxX, ws.width);
+    maxY = Math.max(maxY, ws.height);
     // Add a small margin
     return { minX: minX - 20, minY: minY - 20, maxX: maxX + 20, maxY: maxY + 20 };
   }
@@ -75,6 +80,13 @@
         if (previewModal) previewModal.hidden = true;
       };
     }
+    // ESC key closes preview modal
+    document.addEventListener('keydown', function (e) {
+      if (!previewModal || previewModal.hidden) return;
+      if (e.key === 'Escape') {
+        previewModal.hidden = true;
+      }
+    });
   });
 
 

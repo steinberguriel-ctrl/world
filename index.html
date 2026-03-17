@@ -71,7 +71,7 @@
 
     <main id="stageWrap">
       <button id="previewBtn" type="button" aria-label="תצוגה מקדימה">🔍 תצוגה מקדימה</button>
-      <div id="previewModal" class="settings-modal" hidden>
+      <div id="previewModal" class="settings-modal" hidden onclick="if(event.target===this){this.hidden=true;}">
         <div class="settings-card" style="max-width:900px; width:90vw;">
           <h3 style="margin-bottom:10px;">תצוגה מקדימה של כל העולם</h3>
           <div style="display:flex; justify-content:center; align-items:center;">
