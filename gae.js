@@ -1,5 +1,83 @@
-// פשוט, מודולרי, DPI-aware world builder
 (() => {
+  // --- Preview Mode State ---
+  let previewMode = false;
+  let previewScale = 1;
+  let previewOffsetX = 0;
+  let previewOffsetY = 0;
+  let previewBtn, previewModal, previewCloseBtn, previewWorldCanvas;
+
+  function getWorldBounds() {
+    // Compute the bounding box of all items, fallback to world size if empty
+    if (!state.items.length) {
+      const ws = getActiveWorldSize();
+      return { minX: 0, minY: 0, maxX: ws.width, maxY: ws.height };
+    }
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const it of state.items) {
+      const b = getProjectedBounds(it);
+      minX = Math.min(minX, b.minX);
+      minY = Math.min(minY, b.minY);
+      maxX = Math.max(maxX, b.maxX);
+      maxY = Math.max(maxY, b.maxY);
+    }
+    // Add a small margin
+    return { minX: minX - 20, minY: minY - 20, maxX: maxX + 20, maxY: maxY + 20 };
+  }
+
+  function drawPreviewWorld() {
+    if (!previewWorldCanvas) return;
+    const ctx = previewWorldCanvas.getContext('2d');
+    ctx.clearRect(0, 0, previewWorldCanvas.width, previewWorldCanvas.height);
+    const bounds = getWorldBounds();
+    const worldW = bounds.maxX - bounds.minX;
+    const worldH = bounds.maxY - bounds.minY;
+    const canvasW = previewWorldCanvas.width;
+    const canvasH = previewWorldCanvas.height;
+    const scale = Math.min(canvasW / worldW, canvasH / worldH, 1);
+    const offsetX = (canvasW - worldW * scale) / 2 - bounds.minX * scale;
+    const offsetY = (canvasH - worldH * scale) / 2 - bounds.minY * scale;
+    ctx.save();
+    ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+    // Draw each item with a local context, not using global ctx
+    const items = state.items.slice().sort(compareItemsByLayer);
+    const terrainAdjacency = buildTerrainAdjacency(items);
+    const viewState = getParallaxState();
+    for (const it of items) {
+      if (it.type === 'grass' || it.type === 'rock' || it.type === 'powerbox') {
+        draw3DBlock(ctx, it, terrainAdjacency, viewState);
+      } else if (it.type === 'spawn') {
+        drawSpawnPoint(ctx, it, viewState);
+      } else if (images[it.type]) {
+        ctx.drawImage(images[it.type], it.x, it.y, it.w, it.h);
+      } else {
+        ctx.fillStyle = '#90EE90';
+        ctx.fillRect(it.x, it.y, it.w, it.h);
+      }
+    }
+    ctx.restore();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    previewBtn = document.getElementById('previewBtn');
+    previewModal = document.getElementById('previewModal');
+    previewCloseBtn = document.getElementById('previewCloseBtn');
+    previewWorldCanvas = document.getElementById('previewWorldCanvas');
+    if (previewBtn) {
+      previewBtn.onclick = () => {
+        if (previewModal) {
+          drawPreviewWorld();
+          previewModal.hidden = false;
+        }
+      };
+    }
+    if (previewCloseBtn) {
+      previewCloseBtn.onclick = () => {
+        if (previewModal) previewModal.hidden = true;
+      };
+    }
+  });
+
+
 
   // CONFIG
   const ASSETS = {
@@ -774,6 +852,22 @@
     ctxRef.arcTo(x + w, y, x + w, y + r, r);
     ctxRef.lineTo(x + w, y + h - r);
     ctxRef.arcTo(x + w, y + h, x + w - r, y + h, r);
+    function drawPoly(points, fillStyle, strokeStyle = null, ctxArg) {
+      const ctxLocal = ctxArg || ctx;
+      ctxLocal.save();
+      ctxLocal.beginPath();
+      ctxLocal.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) ctxLocal.lineTo(points[i].x, points[i].y);
+      ctxLocal.closePath();
+      ctxLocal.fillStyle = fillStyle;
+      ctxLocal.fill();
+      if (strokeStyle) {
+        ctxLocal.strokeStyle = strokeStyle;
+        ctxLocal.lineWidth = 1.2;
+        ctxLocal.stroke();
+      }
+      ctxLocal.restore();
+    }
     ctxRef.lineTo(x + r, y + h);
     ctxRef.arcTo(x, y + h, x, y + h - r, r);
     ctxRef.lineTo(x, y + r);
@@ -1050,7 +1144,7 @@
     ctx.restore();
   }
 
-  function draw3DBlock(item, terrainAdjacency, viewState) {
+  function draw3DBlock(ctx, item, terrainAdjacency, viewState) {
     const parallax = viewState || { blockOffsetX: 0, blockOffsetY: 0 };
     const offsetX = parallax.blockOffsetX || 0;
     const offsetY = parallax.blockOffsetY || 0;
@@ -1093,10 +1187,10 @@
     const left = isGrass ? '#58ab44' : '#a9a28d';
     const edge = 'rgba(0,0,0,0.28)';
 
-    drawPoly([A, B, C, D], top, edge);
-    drawPoly([B, C, c, b], right, edge);
-    drawPoly([D, C, c, d], front, edge);
-    drawPoly([A, D, d, a], left, edge);
+    drawPoly(ctx, [A, B, C, D], top, edge);
+    drawPoly(ctx, [B, C, c, b], right, edge);
+    drawPoly(ctx, [D, C, c, d], front, edge);
+    drawPoly(ctx, [A, D, d, a], left, edge);
 
     ctx.save();
     ctx.beginPath();
@@ -1119,7 +1213,7 @@
     ctx.fillRect(A.x - 2, A.y - 2, (w + lift.diag) + 4, (h + lift.diag) + 4);
 
     ctx.fillStyle = isGrass ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.18)';
-    drawPoly([
+    drawPoly(ctx, [
       { x: A.x + 4, y: A.y + 4 },
       { x: A.x + w * 0.45, y: A.y + 5 },
       { x: A.x + w * 0.38, y: A.y + h * 0.28 },
@@ -1136,7 +1230,7 @@
     ctx.restore();
   }
 
-  function drawSpawnPoint(item, viewState) {
+  function drawSpawnPoint(ctx, item, viewState) {
     const parallax = viewState || { blockOffsetX: 0, blockOffsetY: 0 };
     const x = item.x + (parallax.blockOffsetX || 0);
     const y = item.y + (parallax.blockOffsetY || 0);
@@ -1163,11 +1257,11 @@
 
   function drawItem(it, terrainAdjacency, viewState) {
     if (it.type === 'grass' || it.type === 'rock' || it.type === 'powerbox') {
-      draw3DBlock(it, terrainAdjacency, viewState);
+      draw3DBlock(ctx, it, terrainAdjacency, viewState);
       return;
     }
     if (it.type === 'spawn') {
-      drawSpawnPoint(it, viewState);
+      drawSpawnPoint(ctx, it, viewState);
       return;
     }
     if (images[it.type]) {
@@ -1217,7 +1311,12 @@
     const terrainAdjacency = buildTerrainAdjacency(state.items);
     const viewState = getParallaxState();
     ctx.save();
-    ctx.translate(-camera.x, -camera.y);
+    if (previewMode) {
+      ctx.setTransform(dpr * previewScale, 0, 0, dpr * previewScale, dpr * previewOffsetX, dpr * previewOffsetY);
+    } else {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.translate(-camera.x, -camera.y);
+    }
     const sorted = [...state.items].sort(compareItemsByLayer);
     for (const it of sorted) drawItem(it, terrainAdjacency, viewState);
     ctx.restore();
@@ -1541,4 +1640,5 @@
     };
     r.readAsText(f);
   });
+  // ...existing code...
 })();

@@ -51,7 +51,7 @@
       <div class="resource" data-type="spawn">
         <canvas id="spawnPreviewCanvas" class="resource-canvas" width="80" height="48"
           aria-label="spawn preview"></canvas>
-        <span>הולדה</span>
+        <span>מיקום הדמות</span>
       </div>
       <hr>
       <label><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
@@ -70,6 +70,19 @@
     </aside>
 
     <main id="stageWrap">
+      <button id="previewBtn" type="button" aria-label="תצוגה מקדימה">🔍 תצוגה מקדימה</button>
+      <div id="previewModal" class="settings-modal" hidden>
+        <div class="settings-card" style="max-width:900px; width:90vw;">
+          <h3 style="margin-bottom:10px;">תצוגה מקדימה של כל העולם</h3>
+          <div style="display:flex; justify-content:center; align-items:center;">
+            <canvas id="previewWorldCanvas" width="500" height="500"
+              style="background:#eaf2d7; border:1px solid #aaa;"></canvas>
+          </div>
+          <div class="settings-actions" style="margin-top:14px;">
+            <button id="previewCloseBtn" type="button">סגור</button>
+          </div>
+        </div>
+      </div>
       <button id="settingsBtn" type="button" aria-label="הגדרות">⚙ הגדרות</button>
       <button id="worldSelectBtn" type="button" aria-label="בחירת עולם">בחירת עולם</button>
       <div id="stageControls" aria-label="camera controls">
@@ -85,8 +98,7 @@
           <h3 id="worldSelectTitle">בחירת עולם</h3>
           <div class="world-select-grid">
             <button type="button" class="world-option" data-world-slot="1" data-world-name="סולו / זוג / שלישיה">1. סולו
-              /
-              זוג / שלישיה</button>
+              / זוג / שלישיה</button>
             <button type="button" class="world-option locked-now" data-world-slot="2" data-world-name="שוד">2.
               שוד</button>
             <button type="button" class="world-option locked-now" data-world-slot="3" data-world-name="כדורגל">3.

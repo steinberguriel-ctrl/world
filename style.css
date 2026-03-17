@@ -1,3 +1,9 @@
+.resource.spawn-label-only {
+    cursor: default;
+    user-select: none;
+    pointer-events: none;
+    opacity: 0.7;
+}
 
 :root {
     --palette-w: 320px;
@@ -308,11 +314,25 @@ body {
 }
 
 @keyframes deniedShake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    50% { transform: translateX(4px); }
-    75% { transform: translateX(-3px); }
-    100% { transform: translateX(0); }
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    50% {
+        transform: translateX(4px);
+    }
+
+    75% {
+        transform: translateX(-3px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 @media (max-width: 760px) {
