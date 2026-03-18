@@ -1,3 +1,67 @@
+<script>
+  function resizeUI() {
+    const palette = document.getElementById('palette');
+    const controls = document.querySelector('.controls');
+    const stage = document.getElementById('stage');
+    const previewWorldCanvas = document.getElementById('previewWorldCanvas');
+    const main = document.getElementById('stageWrap');
+    const modals = document.querySelectorAll('.settings-modal .settings-card, .settings-modal .world-select-card');
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    // Palette
+    if (palette) {
+      if (w < 900) {
+        palette.style.width = '100vw';
+        palette.style.padding = '8px 4px';
+      } else {
+        palette.style.width = '';
+        palette.style.padding = '';
+      }
+    }
+    // Controls
+    if (controls) {
+      if (w < 900) {
+        controls.style.flexDirection = 'row';
+        controls.style.gap = '6px';
+      } else {
+        controls.style.flexDirection = 'column';
+        controls.style.gap = '8px';
+      }
+    }
+    // Canvas
+    if (stage) {
+      if (w < 600) {
+        stage.width = Math.max(220, Math.floor(w * 0.98));
+        stage.height = Math.max(120, Math.floor(w * 0.6));
+      } else {
+        stage.width = 1200;
+        stage.height = 800;
+      }
+    }
+    // Preview canvas
+    if (previewWorldCanvas) {
+      if (w < 600) {
+        previewWorldCanvas.width = Math.max(220, Math.floor(w * 0.98));
+        previewWorldCanvas.height = Math.max(220, Math.floor(w * 0.98));
+      } else {
+        previewWorldCanvas.width = 500;
+        previewWorldCanvas.height = 500;
+      }
+    }
+    // Modals
+    modals.forEach(card => {
+      if (w < 600) {
+        card.style.width = '98vw';
+        card.style.padding = '6px';
+      } else {
+        card.style.width = '';
+        card.style.padding = '';
+      }
+    });
+  }
+  window.addEventListener('resize', resizeUI);
+  window.addEventListener('DOMContentLoaded', resizeUI);
+</script>
 <!DOCTYPE html>
 <html lang="he">
 
