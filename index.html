@@ -118,17 +118,16 @@
         <span>מיקום הדמות</span>
       </div>
       <hr>
-      <label><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
       <div style="margin-top:12px;">
         <label style="display:block; margin-bottom:4px;">צבע רקע:</label>
         <input type="color" id="bgColorPicker" value="#eaf2d7" style="width:100%; height:36px; cursor:pointer;">
         <div id="colorDisplay" style="margin-top:6px; font-size:13px; color:#000000;"> #eaf2d7</div>
       </div>
       <div class="controls">
-        <button id="undoBtn">חזור</button>
-        <button id="redoBtn">הבא</button>
-        <button id="clearAllBtn">מחק הכל</button>
-        <button id="exportBtn">יצא JSON</button>
+        <button id="undoBtn" class="app-btn">חזור</button>
+        <button id="redoBtn" class="app-btn">הבא</button>
+        <button id="clearAllBtn" class="app-btn">מחק הכל</button>
+        <button id="exportBtn" class="app-btn">יצא JSON</button>
         <input id="importFile" type="file" accept="application/json" />
       </div>
     </aside>
@@ -136,29 +135,30 @@
     <main id="stageWrap">
       <button id="previewBtn" type="button" aria-label="תצוגה מקדימה">🔍 תצוגה מקדימה</button>
       <div id="previewModal" class="settings-modal" hidden onclick="if(event.target===this){this.hidden=true;}">
-        <div class="settings-card" style="max-width:900px; width:90vw;">
+        <div class="settings-card preview-modal-card" style="max-width:900px; width:90vw;">
           <h3 style="margin-bottom:10px;">תצוגה מקדימה של כל העולם</h3>
           <div style="display:flex; justify-content:center; align-items:center;">
             <canvas id="previewWorldCanvas" width="500" height="500"
               style="background:#eaf2d7; border:1px solid #aaa;"></canvas>
           </div>
           <div class="settings-actions" style="margin-top:14px;">
-            <button id="previewCloseBtn" type="button">סגור</button>
+            <button id="previewCloseBtn" class="app-btn" type="button">סגור</button>
           </div>
         </div>
       </div>
       <button id="settingsBtn" type="button" aria-label="הגדרות">⚙ הגדרות</button>
       <button id="worldSelectBtn" type="button" aria-label="בחירת עולם">בחירת עולם</button>
       <div id="stageControls" aria-label="camera controls">
-        <button id="scrollLeftBtn" type="button" aria-label="גלול שמאלה">◀</button>
+        <button id="scrollLeftBtn" class="app-btn" type="button" aria-label="גלול שמאלה">◀</button>
         <div id="cameraHud">X: 0&nbsp;&nbsp;Y: 0</div>
-        <button id="fullscreenBtn" type="button" aria-label="פתח במסך מלא">מסך מלא</button>
-        <button id="scrollRightBtn" type="button" aria-label="גלול ימינה">▶</button>
+        <button id="fullscreenBtn" class="app-btn" type="button" aria-label="פתח במסך מלא">מסך מלא</button>
+        <button id="scrollRightBtn" class="app-btn" type="button" aria-label="גלול ימינה">▶</button>
       </div>
       <canvas id="stage" width="1200" height="800"></canvas>
 
       <div id="worldSelectModal" class="settings-modal" hidden>
-        <div class="settings-card world-select-card" role="dialog" aria-modal="true" aria-labelledby="worldSelectTitle">
+        <div class="settings-card world-select-card world-select-preview-card" role="dialog" aria-modal="true"
+          aria-labelledby="worldSelectTitle">
           <h3 id="worldSelectTitle">בחירת עולם</h3>
           <div class="world-select-grid">
             <button type="button" class="world-option" data-world-slot="1" data-world-name="סולו / זוג / שלישיה">1. סולו
@@ -179,12 +179,13 @@
           </div>
           <div id="worldSelectNotice" class="world-select-notice" aria-live="polite"></div>
           <div class="settings-actions">
-            <button id="worldSelectCloseBtn" type="button">סגור</button>
+            <button id="worldSelectCloseBtn" class="app-btn" type="button">סגור</button>
           </div>
         </div>
       </div>
       <div id="settingsModal" class="settings-modal" hidden>
-        <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="settings-card settings-preview-card" role="dialog" aria-modal="true"
+          aria-labelledby="settingsTitle">
           <h3 id="settingsTitle">הגדרות</h3>
           <label for="powerboxHpInput">חיים של תיבת כוח:</label>
           <input id="powerboxHpInput" type="number" min="1" max="999999" step="1" value="1000" />
@@ -201,8 +202,8 @@
           <p>לחיצה ימנית על המשאב תמחק אותו.</p>
 
           <div class="settings-actions">
-            <button id="settingsSaveBtn" type="button">שמור</button>
-            <button id="settingsCloseBtn" type="button">סגור</button>
+            <button id="settingsSaveBtn" class="app-btn" type="button">שמור</button>
+            <button id="settingsCloseBtn" class="app-btn" type="button">סגור</button>
           </div>
         </div>
       </div>

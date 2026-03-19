@@ -182,6 +182,7 @@
 
       state.settings.placementAnchorVersion = PLACEMENT_ANCHOR_VERSION;
       persistWorldState();
+      draw(); // מצייר את החפצים מיד אחרי טעינה
     } catch (err) {
       // Ignore malformed storage.
     }
@@ -1350,8 +1351,6 @@
 
   // SNAP
   function snap(v) {
-    const snapOn = document.getElementById('snapToggle').checked;
-    if (!snapOn) return v;
     return Math.round(v / PLACEMENT_SNAP_STEP) * PLACEMENT_SNAP_STEP;
   }
 
